@@ -121,6 +121,9 @@ class TrulySaneOListProcessor(OListProcessor, TrulySaneBlockProcessorMixin):
             else:
                 if not self.parser.markdown.lazy_ol and self.STARTSWITH != "1":
                     lst.attrib["start"] = self.STARTSWITH
+                elif self.index_start != 1:
+                    # Non-standard index_start
+                    lst.attrib["start"] = str(self.index_start)
 
         self.parser.state.set("list")
         for item in items:
