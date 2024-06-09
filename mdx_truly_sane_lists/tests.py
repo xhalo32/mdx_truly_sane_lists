@@ -151,6 +151,35 @@ class TrulySaneListTest(unittest.TestCase):
         actual = markdown(dedent(raw), extensions=["mdx_truly_sane_lists"])
         self.assertEqual(expected, actual)
 
+    def test_ordered_zero_indexed(self):
+        raw = '''
+            0. zero
+            1. one
+            2. two
+        '''
+        expected = '<ol start="0">\n<li>zero</li>\n<li>one</li>\n<li>two</li>\n</ol>'
+        actual = markdown(dedent(raw), extensions=["mdx_truly_sane_lists"])
+        self.assertEqual(expected, actual)
+
+    def test_ordered_index_start(self):
+        raw = '''
+            0. zero
+            0. one
+            0. two
+        '''
+        expected = '<ol start="0">\n<li>zero</li>\n<li>one</li>\n<li>two</li>\n</ol>'
+        actual = markdown(dedent(raw), extensions=["mdx_truly_sane_lists"], extension_configs={'mdx_truly_sane_lists': {'index_start': 0}})
+        self.assertEqual(expected, actual)
+
+        raw = '''
+            1. zero
+            2. one
+            3. two
+        '''
+        expected = '<ol start="0">\n<li>zero</li>\n<li>one</li>\n<li>two</li>\n</ol>'
+        actual = markdown(dedent(raw), extensions=["mdx_truly_sane_lists"], extension_configs={'mdx_truly_sane_lists': {'index_start': 0}})
+        self.assertEqual(expected, actual)
+
     def test_ordered_with_empty_lines(self):
         raw='''
         1. one

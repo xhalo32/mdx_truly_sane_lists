@@ -22,11 +22,14 @@ class TrulySaneListExtension(Extension):
         self.config = {
             "nested_indent": [2, "Sets indent for nested lists. Defaults to 2"],
             "truly_sane": [True, "True to stop messing up paragraps and linebreaks. Defaults to True"],
+            "index_start": [1, "Integer to start indexing with. Defaults to 1"],
         }
 
         super(TrulySaneListExtension, self).__init__(*args, **kwargs)
+        # WHAT?!?!?
         TrulySaneBlockProcessorMixin.truly_sane_tab_length = self.getConfigs()["nested_indent"]
         TrulySaneBlockProcessorMixin.truly_sane = self.getConfigs()["truly_sane"]
+        TrulySaneBlockProcessorMixin.index_start = self.getConfigs()["index_start"]
 
     def _extendMarkdown3(self, md):
         md.parser.blockprocessors.register(TrulySaneOListProcessor(md.parser), "olist", 50)
@@ -58,6 +61,7 @@ def makeExtension(*args, **kwargs):
 class TrulySaneBlockProcessorMixin(BlockProcessor):
     truly_sane_tab_length = 2
     truly_sane = True
+    index_start = 1
 
     def __init__(self, parser):
         super(TrulySaneBlockProcessorMixin, self).__init__(parser)
@@ -71,6 +75,10 @@ class TrulySaneListIndentProcessor(ListIndentProcessor, TrulySaneBlockProcessorM
 
 class TrulySaneOListProcessor(OListProcessor, TrulySaneBlockProcessorMixin):
     SIBLING_TAGS = ["ol"]  # from sane lists
+
+    # Must be False to not ignore STARTSWITH
+    # https://github.com/Python-Markdown/markdown/blob/ec8c305fb14eb081bb874c917d8b91d3c5122334/markdown/blockprocessors.py#L338
+    LAZY_OL = False
 
     def __init__(self, *args, **kwargs):
 
@@ -107,6 +115,9 @@ class TrulySaneOListProcessor(OListProcessor, TrulySaneBlockProcessorMixin):
             if md_version >= "3.0":
                 if not self.LAZY_OL and self.STARTSWITH != "1":
                     lst.attrib["start"] = self.STARTSWITH
+                elif self.index_start != 1:
+                    # Non-standard index_start
+                    lst.attrib["start"] = str(self.index_start)
             else:
                 if not self.parser.markdown.lazy_ol and self.STARTSWITH != "1":
                     lst.attrib["start"] = self.STARTSWITH
